@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Layer Finance</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f3f5f2;color:#26352d}
+.login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.login-box{background:white;padding:35px;border-radius:18px;width:100%;max-width:380px;box-shadow:0 10px 40px #0001}
+.logo{font-size:22px;font-weight:bold;letter-spacing:2px;color:#244b38}
+.sub{color:#829087;font-size:13px;margin:8px 0 25px}
+input{width:100%;padding:13px;margin:8px 0;border:1px solid #dce3dd;border-radius:8px;font-size:15px}
+button{border:0;background:#244b38;color:white;padding:13px;border-radius:8px;cursor:pointer;font-weight:bold}
+.login-box button{width:100%;margin-top:12px}
+.small{font-size:12px;color:#8b958e;margin-top:15px}
+#app{display:none}
+header{background:#244b38;color:white;padding:18px 22px;display:flex;justify-content:space-between;align-items:center}
+header span{font-size:12px;color:#d0dfd5}
+.layout{display:flex;min-height:calc(100vh - 65px)}
+nav{width:220px;background:#fff;padding:20px;border-right:1px solid #e5e9e5}
+nav button{width:100%;margin-bottom:8px;text-align:left;background:transparent;color:#35493d}
+nav button:hover,nav button.active{background:#e5eee8;color:#244b38}
+main{padding:25px;width:100%;max-width:1200px;margin:auto}
+h2{margin-top:0}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:15px}
+.card{background:white;padding:20px;border-radius:12px;border:1px solid #e8ece8}
+.card small{color:#8a968e}
+.amount{font-size:24px;font-weight:bold;margin-top:12px}
+.section{display:none}
+.section.show{display:block}
+.welcome{background:#244b38;color:white;padding:22px;border-radius:14px;margin-bottom:20px}
+.welcome p{color:#d7e5db;font-size:14px}
+table{width:100%;border-collapse:collapse;background:white;margin-top:15px}
+th,td{text-align:left;padding:12px;border-bottom:1px solid #eee;font-size:13px}
+th{background:#e8eee9}
+@media(max-width:700px){
+.layout{display:block}
+nav{width:100%;display:flex;overflow:auto;padding:10px}
+nav button{min-width:120px;margin:4px}
+main{padding:15px}
+}
+</style>
+</head>
+<body>
+<div class="login" id="login">
+ <div class="login-box">
+  <div class="logo">THE LAYER</div>
+  <div class="sub">FINANCE & ACCOUNTING SYSTEM</div>
+  <input id="username" placeholder="Username">
+  <input id="password" type="password" placeholder="Password">
+  <button onclick="masuk()">LOGIN</button>
+  <div class="small">Prototype awal The Layer Finance</div>
+ </div>
+</div>
+
+<div id="app">
+<header>
+ <div><b>THE LAYER FINANCE</b><br><span>Accounting & Payment System</span></div>
+ <button onclick="keluar()" style="background:#ffffff22">Keluar</button>
+</header>
+<div class="layout">
+<nav>
+ <button class="active" onclick="buka('dashboard',this)">Dashboard</button>
+ <button onclick="buka('ap',this)">Account Payable</button>
+ <button onclick="buka('supplier',this)">Supplier</button>
+ <button onclick="buka('petty',this)">Petty Cash</button>
+ <button onclick="buka('operasional',this)">Operasional</button>
+</nav>
+<main>
+<section id="dashboard" class="section show">
+ <div class="welcome">
+  <h2>Dashboard Keuangan</h2>
+  <p>Selamat datang di sistem keuangan The Layer.</p>
+ </div>
+ <div class="cards">
+  <div class="card"><small>Total Hutang</small><div class="amount">Rp 0</div></div>
+  <div class="card"><small>Sudah Dibayar</small><div class="amount">Rp 0</div></div>
+  <div class="card"><small>Belum Dibayar</small><div class="amount">Rp 0</div></div>
+  <div class="card"><small>Jumlah Supplier</small><div class="amount">0</div></div>
+ </div>
+ <div class="card" style="margin-top:20px">
+  <h3>Ringkasan</h3>
+  <p>Dashboard akan menampilkan data pembayaran, invoice, supplier dan pengeluaran.</p>
+ </div>
+</section>
+
+<section id="ap" class="section">
+ <h2>Account Payable</h2>
+ <div class="card">
+  <p>Daftar invoice dan pembayaran supplier akan dikelola di bagian ini.</p>
+  <p>Status pembayaran, nomor bukti, metode pembayaran dan tanggal bayar.</p>
+ </div>
+</section>
+
+<section id="supplier" class="section">
+ <h2>Supplier</h2>
+ <div class="card"><p>Data supplier akan dikelola di sini.</p></div>
+</section>
+
+<section id="petty" class="section">
+ <h2>Petty Cash</h2>
+ <div class="card"><p>Catatan kas kecil dan pembayaran petty cash.</p></div>
+</section>
+
+<section id="operasional" class="section">
+ <h2>Operasional</h2>
+ <div class="card"><p>Catatan pengeluaran operasional.</p></div>
+</section>
+</main>
+</div>
+</div>
+
+<script>
+function masuk(){
+ const u=document.getElementById('username').value;
+ const p=document.getElementById('password').value;
+ if(u==='admin' && p==='123456'){
+  document.getElementById('login').style.display='none';
+  document.getElementById('app').style.display='block';
+ }else{
+  alert('Username atau password salah. Prototype: admin / 123456');
+ }
+}
+function keluar(){
+ document.getElementById('app').style.display='none';
+ document.getElementById('login').style.display='flex';
+}
+function buka(id,btn){
+ document.querySelectorAll('.section').forEach(s=>s.classList.remove('show'));
+ document.getElementById(id).classList.add('show');
+ document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+ btn.classList.add('active');
+}
+</script>
+</body>
+</html>
