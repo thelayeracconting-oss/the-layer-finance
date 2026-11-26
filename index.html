@@ -139,7 +139,11 @@ async function masuk(){
     email: username.value.trim(),
     password: password.value
   });
-
+async function keluar(){
+  await db.auth.signOut();
+  app.style.display='none';
+  login.style.display='flex';
+}
   if(error){
     alert('Login gagal: ' + error.message);
     return;
