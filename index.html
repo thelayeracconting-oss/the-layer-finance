@@ -2,137 +2,275 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>The Layer Finance</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;font-family:Arial,sans-serif;background:#f3f5f2;color:#26352d}
-.login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
-.login-box{background:white;padding:35px;border-radius:18px;width:100%;max-width:380px;box-shadow:0 10px 40px #0001}
-.logo{font-size:22px;font-weight:bold;letter-spacing:2px;color:#244b38}
-.sub{color:#829087;font-size:13px;margin:8px 0 25px}
-input{width:100%;padding:13px;margin:8px 0;border:1px solid #dce3dd;border-radius:8px;font-size:15px}
-button{border:0;background:#244b38;color:white;padding:13px;border-radius:8px;cursor:pointer;font-weight:bold}
-.login-box button{width:100%;margin-top:12px}
-.small{font-size:12px;color:#8b958e;margin-top:15px}
+body{margin:0;font-family:Arial;background:#f2f5f2;color:#29382f}
+header{background:#244b38;color:white;padding:18px;display:flex;justify-content:space-between;align-items:center}
+button{border:0;border-radius:8px;padding:11px 14px;background:#244b38;color:white;cursor:pointer}
+button:hover{opacity:.85}
+input,select{padding:11px;border:1px solid #d5ded7;border-radius:8px;width:100%;margin:5px 0;font-size:14px}
+.login{min-height:100vh;display:flex;align-items:center;justify-content:center}
+.loginbox{background:white;padding:30px;border-radius:16px;width:340px}
 #app{display:none}
-header{background:#244b38;color:white;padding:18px 22px;display:flex;justify-content:space-between;align-items:center}
-header span{font-size:12px;color:#d0dfd5}
-.layout{display:flex;min-height:calc(100vh - 65px)}
-nav{width:220px;background:#fff;padding:20px;border-right:1px solid #e5e9e5}
-nav button{width:100%;margin-bottom:8px;text-align:left;background:transparent;color:#35493d}
-nav button:hover,nav button.active{background:#e5eee8;color:#244b38}
-main{padding:25px;width:100%;max-width:1200px;margin:auto}
-h2{margin-top:0}
-.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:15px}
-.card{background:white;padding:20px;border-radius:12px;border:1px solid #e8ece8}
-.card small{color:#8a968e}
-.amount{font-size:24px;font-weight:bold;margin-top:12px}
+.layout{display:flex;min-height:90vh}
+nav{background:white;padding:15px;width:190px}
+nav button{display:block;width:100%;text-align:left;margin:5px 0;background:white;color:#244b38}
+nav button.active{background:#e4eee7}
+main{padding:20px;width:100%;overflow:auto}
+.card{background:white;padding:18px;border-radius:12px;margin-bottom:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
+table{width:100%;border-collapse:collapse;background:white}
+th,td{padding:11px;border-bottom:1px solid #eee;text-align:left;font-size:13px}
+th{background:#e8eee9}
+.badge{background:#fff0d7;color:#8b6000;padding:5px 8px;border-radius:20px}
+.paid{background:#e2f4e7;color:#25653b}
 .section{display:none}
 .section.show{display:block}
-.welcome{background:#244b38;color:white;padding:22px;border-radius:14px;margin-bottom:20px}
-.welcome p{color:#d7e5db;font-size:14px}
-table{width:100%;border-collapse:collapse;background:white;margin-top:15px}
-th,td{text-align:left;padding:12px;border-bottom:1px solid #eee;font-size:13px}
-th{background:#e8eee9}
-@media(max-width:700px){
-.layout{display:block}
-nav{width:100%;display:flex;overflow:auto;padding:10px}
-nav button{min-width:120px;margin:4px}
-main{padding:15px}
-}
+.formgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+h2{margin-top:0}
+.small{font-size:12px;color:#888}
+@media(max-width:700px){.layout{display:block}nav{width:100%;display:flex;overflow:auto}nav button{min-width:130px}main{padding:12px}}
 </style>
 </head>
 <body>
+
 <div class="login" id="login">
- <div class="login-box">
-  <div class="logo">THE LAYER</div>
-  <div class="sub">FINANCE & ACCOUNTING SYSTEM</div>
-  <input id="username" placeholder="Username">
-  <input id="password" type="password" placeholder="Password">
-  <button onclick="masuk()">LOGIN</button>
-  <div class="small">Prototype awal The Layer Finance</div>
- </div>
+<div class="loginbox">
+<h2 style="color:#244b38">THE LAYER</h2>
+<p class="small">FINANCE & ACCOUNTING SYSTEM</p>
+<input id="username" placeholder="Username">
+<input id="password" type="password" placeholder="Password">
+<button style="width:100%" onclick="masuk()">LOGIN</button>
+</div>
 </div>
 
 <div id="app">
 <header>
- <div><b>THE LAYER FINANCE</b><br><span>Accounting & Payment System</span></div>
- <button onclick="keluar()" style="background:#ffffff22">Keluar</button>
+<div><b>THE LAYER FINANCE</b><br><small>Finance & AP System</small></div>
+<button onclick="keluar()">Keluar</button>
 </header>
 <div class="layout">
 <nav>
- <button class="active" onclick="buka('dashboard',this)">Dashboard</button>
- <button onclick="buka('ap',this)">Account Payable</button>
- <button onclick="buka('supplier',this)">Supplier</button>
- <button onclick="buka('petty',this)">Petty Cash</button>
- <button onclick="buka('operasional',this)">Operasional</button>
+<button class="active" onclick="buka('dashboard',this)">Dashboard</button>
+<button onclick="buka('ap',this)">Account Payable</button>
+<button onclick="buka('supplier',this)">Supplier</button>
+<button onclick="buka('petty',this)">Petty Cash</button>
+<button onclick="buka('operasional',this)">Operasional</button>
 </nav>
 <main>
+
 <section id="dashboard" class="section show">
- <div class="welcome">
-  <h2>Dashboard Keuangan</h2>
-  <p>Selamat datang di sistem keuangan The Layer.</p>
- </div>
- <div class="cards">
-  <div class="card"><small>Total Hutang</small><div class="amount">Rp 0</div></div>
-  <div class="card"><small>Sudah Dibayar</small><div class="amount">Rp 0</div></div>
-  <div class="card"><small>Belum Dibayar</small><div class="amount">Rp 0</div></div>
-  <div class="card"><small>Jumlah Supplier</small><div class="amount">0</div></div>
- </div>
- <div class="card" style="margin-top:20px">
-  <h3>Ringkasan</h3>
-  <p>Dashboard akan menampilkan data pembayaran, invoice, supplier dan pengeluaran.</p>
- </div>
+<h2>Dashboard</h2>
+<div class="grid">
+<div class="card">Total Invoice<div id="totalInv" style="font-size:22px;font-weight:bold">Rp 0</div></div>
+<div class="card">Belum Dibayar<div id="totalUnpaid" style="font-size:22px;font-weight:bold">Rp 0</div></div>
+<div class="card">Sudah Dibayar<div id="totalPaid" style="font-size:22px;font-weight:bold">Rp 0</div></div>
+<div class="card">Jumlah Invoice<div id="countInv" style="font-size:22px;font-weight:bold">0</div></div>
+</div>
 </section>
 
 <section id="ap" class="section">
- <h2>Account Payable</h2>
- <div class="card">
-  <p>Daftar invoice dan pembayaran supplier akan dikelola di bagian ini.</p>
-  <p>Status pembayaran, nomor bukti, metode pembayaran dan tanggal bayar.</p>
- </div>
+<h2>Account Payable</h2>
+<div class="card">
+<h3>Input Invoice</h3>
+<div class="formgrid">
+<div><label>Tanggal Nota</label><input type="date" id="tglNota"></div>
+<div><label>Tanggal Bayar / Jatuh Tempo</label><input type="date" id="tglBayar"></div>
+<div><label>Nomor Invoice</label><input id="noInv" placeholder="Nomor invoice"></div>
+<div><label>Supplier</label><input id="sup" placeholder="Nama supplier"></div>
+<div><label>Kategori</label>
+<select id="kategori">
+<option>Supplier</option>
+<option>Project</option>
+<option>Operasional</option>
+<option>Petty Cash</option>
+</select></div>
+<div><label>Nama Barang</label><input id="item" placeholder="Nama barang"></div>
+<div><label>Qty</label><input type="number" id="qty" value="1"></div>
+<div><label>Satuan</label><input id="unit" placeholder="Pcs / Kg / Unit"></div>
+<div><label>Harga Satuan</label><input type="number" id="harga" value="0"></div>
+<div><label>Pajak</label><input type="number" id="tax" value="0" placeholder="Nominal pajak"></div>
+<div><label>Diskon</label><input type="number" id="diskon" value="0"></div>
+</div>
+<button onclick="simpan()" style="margin-top:12px">Simpan Invoice</button>
+</div>
+
+<div class="card">
+<h3>Daftar Invoice</h3>
+<input id="search" placeholder="Cari supplier atau invoice..." oninput="render()">
+<div style="overflow:auto">
+<table>
+<thead><tr>
+<th>Invoice</th><th>Tanggal</th><th>Supplier</th><th>Item</th><th>Total</th><th>Status</th><th>Aksi</th>
+</tr></thead>
+<tbody id="list"></tbody>
+</table>
+</div>
+</div>
 </section>
 
 <section id="supplier" class="section">
- <h2>Supplier</h2>
- <div class="card"><p>Data supplier akan dikelola di sini.</p></div>
+<h2>Supplier</h2>
+<div class="card"><p>Daftar supplier otomatis berasal dari invoice yang diinput.</p>
+<div id="supplierList"></div></div>
 </section>
 
 <section id="petty" class="section">
- <h2>Petty Cash</h2>
- <div class="card"><p>Catatan kas kecil dan pembayaran petty cash.</p></div>
+<h2>Petty Cash</h2>
+<div class="card"><p>Invoice kategori Petty Cash akan tercatat dalam daftar AP. Rekap khusus petty cash akan kita bangun selanjutnya.</p></div>
 </section>
 
 <section id="operasional" class="section">
- <h2>Operasional</h2>
- <div class="card"><p>Catatan pengeluaran operasional.</p></div>
+<h2>Operasional</h2>
+<div class="card"><p>Invoice kategori Operasional akan tercatat dalam daftar AP. Rekap operasional akan kita bangun selanjutnya.</p></div>
 </section>
+
 </main>
 </div>
 </div>
 
 <script>
+let data=JSON.parse(localStorage.getItem('layerAP')||'[]');
+
 function masuk(){
- const u=document.getElementById('username').value;
- const p=document.getElementById('password').value;
- if(u==='admin' && p==='123456'){
-  document.getElementById('login').style.display='none';
-  document.getElementById('app').style.display='block';
- }else{
-  alert('Username atau password salah. Prototype: admin / 123456');
- }
+if(username.value==='admin'&&password.value==='123456'){
+login.style.display='none';app.style.display='block';render();
+}else alert('Login salah. Demo: admin / 123456');
 }
-function keluar(){
- document.getElementById('app').style.display='none';
- document.getElementById('login').style.display='flex';
-}
+function keluar(){app.style.display='none';login.style.display='flex'}
+
 function buka(id,btn){
- document.querySelectorAll('.section').forEach(s=>s.classList.remove('show'));
- document.getElementById(id).classList.add('show');
- document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
- btn.classList.add('active');
+document.querySelectorAll('.section').forEach(x=>x.classList.remove('show'));
+document.getElementById(id).classList.add('show');
+document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));
+btn.classList.add('active');
+render();
 }
+
+function rupiah(n){return 'Rp '+Number(n||0).toLocaleString('id-ID')}
+
+function simpan(){
+let s=document.getElementById('sup').value.trim();
+let n=document.getElementById('noInv').value.trim();
+let q=Number(document.getElementById('qty').value);
+let h=Number(document.getElementById('harga').value);
+let t=Number(document.getElementById('tax').value);
+let d=Number(document.getElementById('diskon').value);
+
+if(!s||!n){alert('Supplier dan nomor invoice wajib diisi');return}
+if(data.some(x=>x.no===n)){alert('Nomor invoice sudah terdaftar');return}
+
+let total=(q*h)+t-d;
+if(total<0){alert('Total tidak boleh minus');return}
+
+data.push({
+id:Date.now(),
+nota:document.getElementById('tglNota').value,
+tgl:document.getElementById('tglBayar').value,
+no:n,
+sup:s,
+kategori:document.getElementById('kategori').value,
+item:document.getElementById('item').value,
+qty:q,unit:document.getElementById('unit').value,
+harga:h,tax:t,diskon:d,total:total,
+status:'UNPAID',bukti:'',metode:''
+});
+simpanData();
+alert('Invoice berhasil disimpan');
+document.querySelectorAll('#ap input').forEach(x=>x.value='');
+document.getElementById('qty').value=1;
+document.getElementById('tax').value=0;
+document.getElementById('diskon').value=0;
+render();
+}
+
+function simpanData(){localStorage.setItem('layerAP',JSON.stringify(data))}
+
+function render(){
+let cari=(document.getElementById('search')?.value||'').toLowerCase();
+let hasil=data.filter(x=>(x.sup+' '+x.no+' '+x.item).toLowerCase().includes(cari));
+document.getElementById('list').innerHTML=hasil.map(x=>`
+<tr>
+<td>${esc(x.no)}</td>
+<td>${esc(x.nota||'')}</td>
+<td>${esc(x.sup)}</td>
+<td>${esc(x.item||'')}</td>
+<td>${rupiah(x.total)}</td>
+<td><span class="badge ${x.status==='PAID'?'paid':''}">${esc(x.status)}</span></td>
+<td>${x.status==='UNPAID'?`<button onclick="bayar(${x.id})">Bayar</button>`:`<button onclick="struk(${x.id})">Struk</button>`}</td>
+</tr>`).join('');
+
+let unpaid=data.filter(x=>x.status==='UNPAID').reduce((a,x)=>a+x.total,0);
+let paid=data.filter(x=>x.status==='PAID').reduce((a,x)=>a+x.total,0);
+let total=data.reduce((a,x)=>a+x.total,0);
+
+document.getElementById('totalInv').innerText=rupiah(total);
+document.getElementById('totalUnpaid').innerText=rupiah(unpaid);
+document.getElementById('totalPaid').innerText=rupiah(paid);
+document.getElementById('countInv').innerText=data.length;
+
+let suppliers=[...new Set(data.map(x=>x.sup))];
+document.getElementById('supplierList').innerHTML=suppliers.map(s=>`<p>${esc(s)}</p>`).join('');
+}
+
+function esc(s){
+return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function bayar(id){
+let x=data.find(a=>a.id===id);
+let metode=prompt('Metode pembayaran:\\nCASH\\nPETTY CASH\\nBCA\\nMANDIRI\\nBRI');
+if(!metode)return;
+metode=metode.toUpperCase().trim();
+if(!['CASH','PETTY CASH','BCA','MANDIRI','BRI'].includes(metode)){
+alert('Metode tidak valid');return;
+}
+let tanggal=new Date();
+let kode='TL-'+tanggal.getFullYear()+String(tanggal.getMonth()+1).padStart(2,'0')+String(tanggal.getDate()).padStart(2,'0')+'-'+String(data.filter(a=>a.status==='PAID').length+1).padStart(3,'0');
+x.status='PAID';
+x.bukti=kode;
+x.metode=metode;
+x.tanggalBayarAktual=tanggal.toISOString().slice(0,10);
+simpanData();
+render();
+struk(id);
+}
+
+function struk(id){
+let x=data.find(a=>a.id===id);
+let w=window.open('','_blank');
+if(!w){alert('Izinkan popup untuk mencetak struk');return}
+w.document.write(`
+<html><head><title>Struk ${esc(x.bukti)}</title>
+<style>
+body{font-family:monospace;width:280px;margin:10px}
+h3{text-align:center}
+hr{border-top:1px dashed black}
+p{margin:5px 0}
+@media print{button{display:none}}
+</style></head><body>
+<h3>THE LAYER CAFE</h3>
+<center>BUKTI PEMBAYARAN</center>
+<hr>
+<p>No Bukti: ${esc(x.bukti)}</p>
+<p>Tanggal: ${esc(x.tanggalBayarAktual)}</p>
+<p>Supplier: ${esc(x.sup)}</p>
+<p>Invoice: ${esc(x.no)}</p>
+<p>Item: ${esc(x.item)}</p>
+<hr>
+<p>Total: ${rupiah(x.total)}</p>
+<p>Metode: ${esc(x.metode)}</p>
+<p>Status: PAID</p>
+<hr>
+<center>Terima kasih</center>
+<button onclick="window.print()">CETAK</button>
+</body></html>`);
+w.document.close();
+}
+
+render();
 </script>
 </body>
 </html>
