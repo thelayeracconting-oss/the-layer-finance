@@ -134,12 +134,21 @@ h2{margin-top:0}
 <script>
 let data=JSON.parse(localStorage.getItem('layerAP')||'[]');
 
-function masuk(){
-if(username.value==='admin'&&password.value==='123456'){
-login.style.display='none';app.style.display='block';render();
-}else alert('Login salah. Demo: admin / 123456');
-}
-function keluar(){app.style.display='none';login.style.display='flex'}
+async function masuk(){
+  const { data, error } = await db.auth.signInWithPassword({
+    email: username.value.trim(),
+    password: password.value
+  });
+
+  if(error){
+    alert('Login gagal: ' + error.message);
+    return;
+  }
+
+  login.style.display='none';
+  app.style.display='block';
+  render();
+}{app.style.display='none';login.style.display='flex'}
 
 function buka(id,btn){
 document.querySelectorAll('.section').forEach(x=>x.classList.remove('show'));
