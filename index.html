@@ -272,23 +272,44 @@ function esc(s){
 return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
-function bayar(id){
+async function bayar(id){
 let x=data.find(a=>a.id===id);
-let metode=prompt('Metode pembayaran:\\nCASH\\nPETTY CASH\\nBCA\\nMANDIRI\\nBRI');
+if(!x)return;
+
+let metode=prompt('Metode pembayaran:\nCASH\nPETTY CASH\nBCA\nMANDIRI\nBRI');
 if(!metode)return;
+
 metode=metode.toUpperCase().trim();
 if(!['CASH','PETTY CASH','BCA','MANDIRI','BRI'].includes(metode)){
 alert('Metode tidak valid');return;
 }
+
 let tanggal=new Date();
+let tanggalBayar=tanggal.toISOString().slice(0,10);
 let kode='TL-'+tanggal.getFullYear()+String(tanggal.getMonth()+1).padStart(2,'0')+String(tanggal.getDate()).padStart(2,'0')+'-'+String(data.filter(a=>a.status==='PAID').length+1).padStart(3,'0');
-x.status='PAID';
-x.bukti=kode;
-x.metode=metode;
-x.tanggalBayarAktual=tanggal.toISOString().slice(0,10);
-simpanData();
-render();
-struk(id);
+
+try{
+  let {error}=await db.rpc('pay_invoice',{
+    p_invoice_id:x.id,
+    p_proof_no:kode,
+    p_method:metode,
+    p_payment_date:tanggalBayar
+  });
+
+  if(error)throw error;
+
+  x.status='PAID';
+  x.bukti=kode;
+  x.metode=metode;
+  x.tanggalBayarAktual=tanggalBayar;
+
+  simpanData();
+  render();
+  struk(id);
+
+}catch(error){
+  alert('Pembayaran gagal: '+error.message);
+}
 }
 
 function struk(id){
