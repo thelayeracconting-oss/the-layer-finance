@@ -130,9 +130,45 @@ h2{margin-top:0}
 </main>
 </div>
 </div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-let data=JSON.parse(localStorage.getItem('layerAP')||'[]');
+  const SUPABASE_URL = "https://iusjvsnpgmyqdrceeyne.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_IUhGFPJAF2dqOyb3tMD2xA_nS-bnK6M";
+
+  const db = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
+</script>
+
+<script>
+let data=[];
+
+<script>
+let data=[];
+
+async function masuk(){
+  const { data: userData, error } = await db.auth.signInWithPassword({
+    email: username.value.trim(),
+    password: password.value
+  });
+
+  if(error){
+    alert('Login gagal: ' + error.message);
+    return;
+  }
+
+  login.style.display='none';
+  app.style.display='block';
+  render();
+}
+
+async function keluar(){
+  await db.auth.signOut();
+  app.style.display='none';
+  login.style.display='flex';
+}
 
 async function masuk(){
   const { data, error } = await db.auth.signInWithPassword({
@@ -345,17 +381,6 @@ w.document.close();
 }
 
 render();
-</script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<script>
-  const SUPABASE_URL = "https://iusjvsnpgmyqdrceeyne.supabase.co/rest/v1/";
-  const SUPABASE_KEY = "sb_publishable_IUhGFPJAF2dqOyb3tMD2xA_nS-bnK6M";
-
-  const db = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-  );
 </script>
 </body>
 </html>
