@@ -164,7 +164,7 @@ render();
 
 function rupiah(n){return 'Rp '+Number(n||0).toLocaleString('id-ID')}
 
-function simpan(){
+async function simpan(){
 let s=document.getElementById('sup').value.trim();
 let n=document.getElementById('noInv').value.trim();
 let q=Number(document.getElementById('qty').value);
@@ -178,29 +178,69 @@ if(data.some(x=>x.no===n)){alert('Nomor invoice sudah terdaftar');return}
 let total=(q*h)+t-d;
 if(total<0){alert('Total tidak boleh minus');return}
 
-data.push({
-id:Date.now(),
-nota:document.getElementById('tglNota').value,
-tgl:document.getElementById('tglBayar').value,
-no:n,
-sup:s,
-kategori:document.getElementById('kategori').value,
-item:document.getElementById('item').value,
-qty:q,unit:document.getElementById('unit').value,
-harga:h,tax:t,diskon:d,total:total,
-status:'UNPAID',bukti:'',metode:''
-});
-simpanData();
-alert('Invoice berhasil disimpan');
-document.querySelectorAll('#ap input').forEach(x=>x.value='');
-document.getElementById('qty').value=1;
-document.getElementById('tax').value=0;
-document.getElementById('diskon').value=0;
-render();
+try{
+  let {data:supplier,error:errSup}=await db
+    .from('suppliers')
+    .upsert({name:s},{onConflict:'name'})
+    .select()
+    .single();
+
+  if(errSup) throw errSup;
+
+  let {data:invoice,error:errInv}=await db
+    .from('invoices')
+    .insert({
+      invoice_no:n,
+      invoice_date:document.getElementById('tglNota').value||null,
+      due_date:document.getElementById('tglBayar').value||null,
+      category:document.getElementById('kategori').value,
+      supplier_id:supplier.id,
+      item_name:document.getElementById('item').value,
+      qty:q,
+      unit:document.getElementById('unit').value,
+      unit_price:h,
+      tax:t,
+      discount:d,
+      total:total,
+      status:'UNPAID'
+    })
+    .select()
+    .single();
+
+  if(errInv) throw errInv;
+
+  data.push({
+    id:invoice.id,
+    nota:invoice.invoice_date,
+    tgl:invoice.due_date,
+    no:n,
+    sup:s,
+    kategori:invoice.category,
+    item:invoice.item_name,
+    qty:q,
+    unit:invoice.unit,
+    harga:h,
+    tax:t,
+    diskon:d,
+    total:total,
+    status:'UNPAID',
+    bukti:'',
+    metode:''
+  });
+
+  simpanData();
+  alert('Invoice berhasil disimpan ke database');
+
+  document.querySelectorAll('#ap input').forEach(x=>x.value='');
+  document.getElementById('qty').value=1;
+  document.getElementById('tax').value=0;
+  document.getElementById('diskon').value=0;
+  render();
+
+}catch(error){
+  alert('Gagal menyimpan: '+error.message);
 }
-
-function simpanData(){localStorage.setItem('layerAP',JSON.stringify(data))}
-
+}
 function render(){
 let cari=(document.getElementById('search')?.value||'').toLowerCase();
 let hasil=data.filter(x=>(x.sup+' '+x.no+' '+x.item).toLowerCase().includes(cari));
