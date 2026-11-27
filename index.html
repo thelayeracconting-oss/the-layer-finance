@@ -40,9 +40,11 @@ h2{margin-top:0}
 <div class="loginbox">
 <h2 style="color:#244b38">THE LAYER</h2>
 <p class="small">FINANCE & ACCOUNTING SYSTEM</p>
-<input id="username" placeholder="Username">
-<input id="password" type="password" placeholder="Password">
-<button style="width:100%" onclick="masuk()">LOGIN</button>
+<form onsubmit="masuk(); return false;">
+<input id="username" name="username" autocomplete="username" placeholder="Username" onkeydown="if(event.key==='Enter'){event.preventDefault();document.getElementById('password').focus();}">
+<input id="password" name="password" type="password" autocomplete="current-password" placeholder="Password">
+<button type="submit" style="width:100%">LOGIN</button>
+</form>
 </div>
 </div>
 
