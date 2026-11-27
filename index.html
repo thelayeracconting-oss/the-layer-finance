@@ -144,6 +144,101 @@ h2{margin-top:0}
 
 <script>
 let data=[];
+let pembayaranDiproses=new Set();
+let pembayaranTidakPasti=new Set();
+
+async function muatInvoice(){
+  const {data:invoices,error:errInv}=await db
+    .from('invoices')
+    .select('*');
+
+  if(errInv) throw errInv;
+
+  let supplierIds=[...new Set(invoices.map(x=>x.supplier_id).filter(Boolean))];
+  let suppliers=[];
+
+  if(supplierIds.length){
+    let {data:rows,error:errSup}=await db
+      .from('suppliers')
+      .select('id,name')
+      .in('id',supplierIds);
+
+    if(errSup) throw errSup;
+    suppliers=rows;
+  }
+
+  let invoiceIds=invoices.map(x=>x.id);
+  let paymentByInvoice=new Map();
+
+  if(invoiceIds.length){
+    let {data:items,error:errPay}=await db
+      .from('payment_items')
+      .select('invoice_id,payment:payments(proof_no,method,payment_date,created_at)')
+      .in('invoice_id',invoiceIds);
+
+    if(errPay) throw errPay;
+
+    let waktu=value=>{
+      let hasil=Date.parse(value||'');
+      return Number.isNaN(hasil)?-Infinity:hasil;
+    };
+
+    items.forEach(item=>{
+      let payment=item.payment;
+      if(!payment) return;
+
+      let current=paymentByInvoice.get(item.invoice_id);
+      if(!current||
+        waktu(payment.payment_date)>waktu(current.payment_date)||
+        (waktu(payment.payment_date)===waktu(current.payment_date)&&
+          waktu(payment.created_at)>waktu(current.created_at))){
+        paymentByInvoice.set(item.invoice_id,payment);
+      }
+    });
+  }
+
+  let namaSupplier=new Map(suppliers.map(x=>[x.id,x.name]));
+
+  data=invoices.map(invoice=>{
+    let payment=paymentByInvoice.get(invoice.id);
+    let paymentIssue='';
+
+    if(invoice.status==='PAID'){
+      if(!payment){
+        paymentIssue='Data pembayaran tidak ditemukan';
+      }else{
+        let fields=[];
+        if(!payment.proof_no) fields.push('nomor bukti');
+        if(!payment.method) fields.push('metode');
+        if(!payment.payment_date) fields.push('tanggal');
+        if(fields.length) paymentIssue='Data pembayaran tidak lengkap: '+fields.join(', ');
+      }
+    }
+
+    return {
+      ...invoice,
+      nota:invoice.invoice_date,
+      tgl:invoice.due_date,
+      no:invoice.invoice_no,
+      sup:namaSupplier.get(invoice.supplier_id)||'',
+      kategori:invoice.category,
+      item:invoice.item_name,
+      qty:Number(invoice.qty||0),
+      unit:invoice.unit,
+      harga:Number(invoice.unit_price||0),
+      tax:Number(invoice.tax||0),
+      diskon:Number(invoice.discount||0),
+      total:Number(invoice.total||0),
+      status:invoice.status,
+      bukti:payment?.proof_no||'',
+      metode:payment?.method||'',
+      tanggalBayarAktual:payment?.payment_date||'',
+      paymentIssue:paymentIssue
+    };
+  });
+
+  pembayaranTidakPasti.clear();
+}
 
 async function masuk(){
   const { data: userData, error } = await db.auth.signInWithPassword({
@@ -156,6 +251,18 @@ async function masuk(){
     return;
   }
 
+  if(!userData.session){
+    alert('Sesi login belum tersedia');
+    return;
+  }
+
+  try{
+    await muatInvoice();
+  }catch(error){
+    alert('Gagal memuat invoice: '+error.message);
+    return;
+  }
+
   login.style.display='none';
   app.style.display='block';
   render();
@@ -165,6 +272,28 @@ async function keluar(){
   await db.auth.signOut();
   app.style.display='none';
   login.style.display='flex';
+}
+
+async function muatJikaSesiAktif(){
+  const {data:sessionData,error}=await db.auth.getSession();
+
+  if(error){
+    alert('Gagal memeriksa sesi: '+error.message);
+    return;
+  }
+
+  if(!sessionData.session) return;
+
+  try{
+    await muatInvoice();
+  }catch(error){
+    alert('Gagal memuat invoice: '+error.message);
+    return;
+  }
+
+  login.style.display='none';
+  app.style.display='block';
+  render();
 }
 
 function buka(id,btn){
@@ -241,7 +370,6 @@ try{
     metode:''
   });
 
-  simpanData();
   alert('Invoice berhasil disimpan ke database');
 
   document.querySelectorAll('#ap input').forEach(x=>x.value='');
@@ -264,7 +392,7 @@ document.getElementById('list').innerHTML=hasil.map(x=>`
 <td>${esc(x.sup)}</td>
 <td>${esc(x.item||'')}</td>
 <td>${rupiah(x.total)}</td>
-<td><span class="badge ${x.status==='PAID'?'paid':''}">${esc(x.status)}</span></td>
+<td><span class="badge ${x.status==='PAID'?'paid':''}">${esc(x.status)}</span>${x.paymentIssue?`<br><span class="small">${esc(x.paymentIssue)}</span>`:''}${x.paymentUncertain?'<br><span class="small">Hasil pembayaran belum pasti; muat ulang sebelum mencoba lagi</span>':''}</td>
 <td>${x.status==='UNPAID'?`<button onclick="bayar(${x.id})">Bayar</button>`:`<button onclick="struk(${x.id})">Struk</button>`}</td>
 </tr>`).join('');
 
@@ -288,6 +416,18 @@ return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','
 async function bayar(id){
 let x=data.find(a=>a.id===id);
 if(!x)return;
+if(x.status==='PAID'){
+alert('Invoice ini sudah dibayar');
+return;
+}
+if(pembayaranDiproses.has(x.id)){
+alert('Pembayaran invoice ini sedang diproses');
+return;
+}
+if(pembayaranTidakPasti.has(x.id)){
+alert('Hasil pembayaran sebelumnya belum dapat dipastikan. Muat ulang halaman untuk memeriksa status sebelum mencoba lagi.');
+return;
+}
 
 let metode=prompt('Metode pembayaran:\nCASH\nPETTY CASH\nBCA\nMANDIRI\nBRI');
 if(!metode)return;
@@ -301,32 +441,60 @@ let tanggal=new Date();
 let tanggalBayar=tanggal.toISOString().slice(0,10);
 let kode='TL-'+tanggal.getFullYear()+String(tanggal.getMonth()+1).padStart(2,'0')+String(tanggal.getDate()).padStart(2,'0')+'-'+String(data.filter(a=>a.status==='PAID').length+1).padStart(3,'0');
 
+let hasilRpc;
+let errorRpc;
+pembayaranDiproses.add(x.id);
 try{
-  let {error}=await db.rpc('pay_invoice',{
+  hasilRpc=await db.rpc('pay_invoice',{
     p_invoice_id:x.id,
     p_proof_no:kode,
     p_method:metode,
     p_payment_date:tanggalBayar
   });
+}catch(error){
+  errorRpc=error;
+}finally{
+  pembayaranDiproses.delete(x.id);
+}
 
-  if(error)throw error;
+let rpcError=errorRpc||hasilRpc?.error;
+if(errorRpc||!hasilRpc||rpcError){
+  let status=hasilRpc?.status;
+  let hasilTidakPasti=!!errorRpc||!hasilRpc||status===0||status==null||status>=500;
 
-  x.status='PAID';
-  x.bukti=kode;
-  x.metode=metode;
-  x.tanggalBayarAktual=tanggalBayar;
+  if(hasilTidakPasti){
+    pembayaranTidakPasti.add(x.id);
+    x.paymentUncertain=true;
+    render();
+    alert('Hasil pembayaran belum dapat dipastikan karena koneksi atau server bermasalah. Muat ulang halaman untuk memeriksa status sebelum mencoba lagi.');
+  }else{
+    alert('Pembayaran gagal: '+(rpcError?.message||String(rpcError)));
+  }
+  return;
+}
 
-  simpanData();
+x.status='PAID';
+x.bukti=kode;
+x.metode=metode;
+x.tanggalBayarAktual=tanggalBayar;
+x.paymentIssue='';
+x.paymentUncertain=false;
+
+try{
   render();
   struk(id);
-
 }catch(error){
-  alert('Pembayaran gagal: '+error.message);
+  alert('Pembayaran berhasil, tetapi tampilan atau struk gagal: '+error.message);
 }
 }
 
 function struk(id){
 let x=data.find(a=>a.id===id);
+if(!x)return;
+if(x.paymentIssue||!x.bukti||!x.metode||!x.tanggalBayarAktual){
+alert('Struk tidak dapat dibuat: '+(x.paymentIssue||'Data pembayaran tidak lengkap'));
+return;
+}
 let w=window.open('','_blank');
 if(!w){alert('Izinkan popup untuk mencetak struk');return}
 w.document.write(`
@@ -357,7 +525,7 @@ p{margin:5px 0}
 w.document.close();
 }
 
-render();
+muatJikaSesiAktif();
 </script>
 </body>
 </html>
